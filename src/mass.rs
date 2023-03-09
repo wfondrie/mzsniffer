@@ -34,7 +34,7 @@ pub fn formula_mass(formula: &str) -> f64 {
 }
 
 
-pub fn mass_to_mz(mass: f64, charge: u32, protonate: bool) -> f64 {
+pub fn mass_to_mz(mass: f64, charge: i32, protonate: bool) -> f64 {
     let mut mz = mass / charge as f64;
     if protonate {
         mz += PROTON;

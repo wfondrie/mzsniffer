@@ -4,6 +4,7 @@ pub mod defaults;
 pub mod polymer;
 pub mod mass;
 pub mod mzml;
+pub mod search;
 // Formats the sum of two numbers as string.
 //#[pyfunction]
 //fn sum_as_string(a: usize, b: usize) -> PyResult<String> {

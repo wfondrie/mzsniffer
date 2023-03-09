@@ -2,9 +2,9 @@ use crate::polymer::Polymer;
 
 // These are the default contaminants
 #[derive(Debug)]
-pub struct DefaultPolymers<'a>(Vec<Polymer<'a>>);
+pub struct DefaultPolymers(pub Vec<Polymer>);
 
-impl DefaultPolymers<'_> {
+impl DefaultPolymers {
     pub fn new() -> Self {
         let polys = vec![
             Polymer::new("PEG+1H", "H2O", "C2H4O", 1, true),
