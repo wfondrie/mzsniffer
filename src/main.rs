@@ -156,3 +156,32 @@ async fn run(
 
     Ok(results)
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::run;
+    const TEST_FILE: &str = "data/MSV000081544.20170728_MS1_17k_plasmaspikedPEG_3.mzML";
+
+    #[tokio::test]
+    async fn smoke() {
+        let results = run(TEST_FILE.to_string(), 10., "ppm".to_string()).await;
+        for poly in results.unwrap().polymers.into_iter() {
+            if poly.name == "PEG+1H" {
+                assert!(
+                    poly.total > 200_000_000_000.0,
+                    "{} was {}",
+                    poly.name,
+                    poly.total,
+                );
+            } else {
+                assert!(
+                    poly.total < 10_000_000_000.0,
+                    "{} was {}",
+                    poly.name,
+                    poly.total,
+                );
+            }
+        }
+    }
+}
