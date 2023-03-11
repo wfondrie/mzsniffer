@@ -8,7 +8,6 @@ description = "Detect polyer contaminants in mass spectra."
 readme = "README.md"
 license = "Apache 2.0"
 
-
 [[bin]]
 name = "mzsniffer"
 path = "src/main.rs"
