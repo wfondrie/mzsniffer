@@ -22,7 +22,7 @@ impl DefaultPolymers {
             Polymer::new("Tween-40", "C22H42O6Na", "C2H4O", 1, false),
             Polymer::new("Tween-60", "C24H46O6Na", "C2H4O", 1, false),
             Polymer::new("Tween-80", "C24H44O6Na", "C2H4O", 1, false),
-            Polymer::new("IGEPAL", "C15H24O", "C2H4O", 1, true),
+            Polymer::new("IGEPAL CA-630 (NP-40)", "C15H24O", "C2H4O", 1, true),
         ];
         Self(polys)
     }

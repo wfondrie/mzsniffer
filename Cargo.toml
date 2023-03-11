@@ -2,25 +2,28 @@
 name = "mzsniffer"
 version = "0.1.0"
 edition = "2021"
+authors = ["William E. Fondire <fondriew@gmail.com>"]
+rust-version = "1.62"
+description = "Detect polyer contaminants in mass spectra."
+readme = "README.md"
+license = "Apache 2.0"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-[lib]
+
+[[bin]]
 name = "mzsniffer"
-crate-type = ["cdylib"]
+path = "src/main.rs"
 
 [dependencies]
-pyo3 = "0.18.1"
 regex = "1.6"
 lazy_static = "1.4.0"
-ndarray = { version = "0.15.6", features = ["rayon"] }
 async-compression = { version = "0.3", features = ["tokio", "zlib"] }
 base64 = "0.13"
-dashmap = { version = "5.4.0", features = ["rayon"] }
-fnv = "1.0"
-itertools = "0.10"
 log = "0.4.0"
-tokio = { version = "1.0", features = ["io-util", "fs", "macros", "rt"] }
+env_logger = "0.10.0"
+tokio = { version = "1.0", features = ["io-util", "fs", "macros", "rt", "rt-multi-thread"] }
 rayon = "1.5"
 serde = { version="1.0", features = ["derive"] }
 serde_json = "1.0"
 quick-xml = { version = "0.25", features = ["async-tokio"] }
+anyhow = "1.0"
+clap = { version="4.0", features = ["cargo", "unicode"] }

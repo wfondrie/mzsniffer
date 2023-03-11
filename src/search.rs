@@ -7,8 +7,9 @@ use crate::polymer::Polymer;
 use crate::mzml::MS1Spectra;
 use crate::defaults::DefaultPolymers;
 
-#[derive(Serialize, Debug)]
-pub struct SearchResults {
+#[derive(Serialize, Clone, Debug)]
+pub struct PolymerResults {
+    pub filename: String,
     pub polymers: Vec<PolymerResult>,
     pub ret_times: Vec<f64>,
     pub tic: Vec<f64>,
@@ -16,7 +17,7 @@ pub struct SearchResults {
 }
 
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Clone, Debug)]
 pub struct PolymerResult {
     pub name: String,
     pub total: f64,
@@ -35,17 +36,19 @@ impl PolymerResult {
 
 
 pub fn search(
+    filename: String,
     spec: MS1Spectra,
     tol: &f64,
     unit: &str
-) -> Result<SearchResults, SearchError> {
+) -> Result<PolymerResults, SearchError> {
     let polymers = DefaultPolymers::new();
     let poly_results: Vec<PolymerResult> = polymers.0
         .into_par_iter()
         .map(|mut x| search_for_polymer(&mut x, &spec, tol, unit))
         .collect::<Result<Vec<PolymerResult>, SearchError>>()?;
 
-    let mut results = SearchResults {
+    let mut results = PolymerResults {
+        filename,
         polymers: poly_results,
         ret_times: Vec::new(),
         tic: Vec::new(),
@@ -85,6 +88,8 @@ fn search_for_polymer(
             )
         )
         .collect::<Vec<f64>>();
+
+    results.total = results.xic.clone().into_iter().sum();
     Ok(results)
 }
 
