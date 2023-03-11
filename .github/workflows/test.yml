@@ -1,4 +1,4 @@
-name: Run Unit and System Tests
+name: Test
 
 on:
   push:
