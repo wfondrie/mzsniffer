@@ -357,13 +357,14 @@ mod tests {
     use super::MzMLReader;
     use tokio::fs::File;
     use tokio::io::BufReader;
+    const TEST_FILE: &str = "data/MSV000081544.20170728_MS1_17k_plasmaspikedPEG_3.mzML";
 
     #[tokio::test]
     async fn smoke() {
-        let mzml_file = File::open("data/small.mzML").await.unwrap();
+        let mzml_file = File::open(TEST_FILE).await.unwrap();
         let mzml_file = BufReader::new(mzml_file);
         let res = MzMLReader::new().parse(mzml_file).await.unwrap();
-        assert_eq!(res.spectra[0].mz.len(), 200);
-        assert_eq!(res.scan_range, (0.0, 1300.0));
+        assert_eq!(res.spectra[0].mz.len(), 435);
+        assert_eq!(res.scan_range, (0.0, 1500.0));
     }
 }

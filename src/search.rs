@@ -152,15 +152,13 @@ mod tests {
     use crate::mzml::MzMLReader;
     use tokio::fs::File;
     use tokio::io::BufReader;
+    const TEST_FILE: &str = "data/MSV000081544.20170728_MS1_17k_plasmaspikedPEG_3.mzML";
 
     #[tokio::test]
     async fn smoke() {
-        let mzml_file = File::open("data/small.mzML").await.unwrap();
+        let mzml_file = File::open(TEST_FILE).await.unwrap();
         let mzml_file = BufReader::new(mzml_file);
         let spectra = MzMLReader::new().parse(mzml_file).await.unwrap();
-        let results = search(spectra, &10., "ppm").unwrap();
-        println!("{:?}", results);
-        let j = serde_json::to_string(&results).unwrap();
-        println!("{:?}", j);
+        search(TEST_FILE.to_string(), spectra, &10., "ppm").unwrap();
     }
 }
