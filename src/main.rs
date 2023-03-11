@@ -1,4 +1,4 @@
-use std::io::Write;
+use std::io::BufWriter;
 use std::path::Path;
 
 use clap::{Arg, Command};
@@ -84,10 +84,33 @@ async fn main() -> anyhow::Result<()> {
     }
 
     // Actually do stuff:
-    for mzml_file in mzml_paths.into_iter() {
-        run(mzml_file, *tol, unit.to_string()).await?;
-    }
+    let results: Vec<PolymerResults> = futures::future::try_join_all(
+        mzml_paths
+        .into_iter()
+        .map(|x| run(x, *tol, unit.to_string()))
+    ).await?;
 
+    // Write to stdout if required:
+    match out_format {
+        Some(txt) => {
+            let mut out_writer = BufWriter::new(std::io::stdout());
+            match txt.to_lowercase().as_str() {
+                "json" => serde_json::to_writer_pretty(
+                    out_writer,
+                    &results,
+                )?,
+                "pickle" => serde_pickle::to_writer(
+                    &mut out_writer,
+                    &results,
+                    serde_pickle::ser::SerOptions::new(),
+                )?,
+                _ => unreachable!("This should never happen..."),
+            }
+        },
+        None => {},
+    };
+
+    // Wrap up
     info!("DONE!");
     let total_time = std::time::Instant::now() - start;
     info!("Elapsed time: {:2}s", total_time.as_secs());
@@ -125,11 +148,8 @@ async fn run(
 
     // Print a brief report to stderr:
     for poly in results.polymers.clone().into_iter() {
-        info!(
-            "{:26}  {:>8.4}",
-            &poly.name,
-            &100. * &poly.total / &results.total,
-        );
+        let poly_total = &100. * &poly.total / &results.total;
+        info!("{:26}  {:>8.4}", &poly.name, poly_total);
     }
     info!("{}", "+".repeat(36));
     info!("");
