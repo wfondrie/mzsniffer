@@ -2,12 +2,11 @@ use std::io::BufWriter;
 use std::path::Path;
 
 use clap::{Arg, Command};
-use log::{info, error};
+use log::{error, info};
 use mzsniffer::mzml::MzMLReader;
 use mzsniffer::search::{search, PolymerResults};
 use tokio::fs::File;
 use tokio::io::BufReader;
-
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -15,42 +14,37 @@ async fn main() -> anyhow::Result<()> {
     env_logger::builder()
         .format_timestamp(None)
         .format_target(false)
-        .parse_env(
-            env_logger::Env::default()
-                .filter_or("MZSNIFFER_LOG", "error,mzsniffer=info")
-        )
+        .parse_env(env_logger::Env::default().filter_or("MZSNIFFER_LOG", "error,mzsniffer=info"))
         .init();
-
 
     let matches = Command::new("mzsniffer")
         .version(clap::crate_version!())
         .author("William E. Fondrie <fondriew@gmail.com>")
         .about("\u{1F9A8} mzsniffer \u{1F443} - Detect polymer conminants in mass spectra.")
-        .arg(Arg::new("mzml_paths").help("The mzML file(s) to analyze.").num_args(1..))
+        .arg(
+            Arg::new("mzml_paths")
+                .help("The mzML file(s) to analyze.")
+                .num_args(1..),
+        )
         .arg(
             Arg::new("tol")
                 .short('t')
                 .long("tolerance")
                 .help("The precursor mass tolerance.")
                 .default_value("10")
-                .value_parser(clap::value_parser!(f64))
+                .value_parser(clap::value_parser!(f64)),
         )
         .arg(
             Arg::new("unit")
                 .short('d')
                 .long("use-da")
                 .help("Use Da instead of ppm as the precursor mass tolerance unit.")
-                .action(clap::ArgAction::SetTrue)
+                .action(clap::ArgAction::SetTrue),
         )
-        .arg(
-            Arg::new("format")
-                .short('f')
-                .long("format")
-                .help(
-                    "Specify an output format to be sent to stdout. \
-                     Must be one of 'json' or 'pickle'."
-                )
-        )
+        .arg(Arg::new("format").short('f').long("format").help(
+            "Specify an output format to be sent to stdout. \
+                     Must be one of 'json' or 'pickle'.",
+        ))
         .help_template(
             "{usage-heading} {usage}\n\n\
              {about-with-newline}\n\
@@ -68,46 +62,38 @@ async fn main() -> anyhow::Result<()> {
     let unit = match matches.get_one::<bool>("unit") {
         Some(true) => "da",
         Some(false) => "ppm",
-        None => unreachable!("This shouldnt happen.")
+        None => unreachable!("This shouldnt happen."),
     };
     let tol = matches.get_one::<f64>("tol").unwrap();
 
     let out_format = matches.get_one::<String>("format");
-    match out_format {
-        Some(txt) => {
-            match txt.to_lowercase().as_str() {
-                "json" | "pickle" => {},
-                _ => error!("Unrecognized output format.")
-            }
-        },
-        None => {},
+    if let Some(txt) = out_format {
+        match txt.to_lowercase().as_str() {
+            "json" | "pickle" => {}
+            _ => error!("Unrecognized output format."),
+        }
     }
 
     // Actually do stuff:
     let results: Vec<PolymerResults> = futures::future::try_join_all(
         mzml_paths
-        .into_iter()
-        .map(|x| run(x, *tol, unit.to_string()))
-    ).await?;
+            .into_iter()
+            .map(|x| run(x, *tol, unit.to_string())),
+    )
+    .await?;
 
     // Write to stdout if required:
-    match out_format {
-        Some(txt) => {
-            let mut out_writer = BufWriter::new(std::io::stdout());
-            match txt.to_lowercase().as_str() {
-                "json" => serde_json::to_writer_pretty(
-                    out_writer,
-                    &results,
-                )?,
-                "pickle" => serde_pickle::to_writer(
-                    &mut out_writer,
-                    &results,
-                    serde_pickle::ser::SerOptions::new(),
-                )?,
-                _ => unreachable!("This should never happen..."),
-            }
-        },
-        None => {},
+    if let Some(txt) = out_format {
+        let mut out_writer = BufWriter::new(std::io::stdout());
+        match txt.to_lowercase().as_str() {
+            "json" => serde_json::to_writer_pretty(out_writer, &results)?,
+            "pickle" => serde_pickle::to_writer(
+                &mut out_writer,
+                &results,
+                serde_pickle::ser::SerOptions::new(),
+            )?,
+            _ => unreachable!("This should never happen..."),
+        }
     };
 
     // Wrap up
@@ -117,12 +103,7 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-
-async fn run(
-    mzml_file: String,
-    tol: f64,
-    unit: String
-) -> anyhow::Result<PolymerResults> {
+async fn run(mzml_file: String, tol: f64, unit: String) -> anyhow::Result<PolymerResults> {
     info!("Reading {}...", &mzml_file);
     let start = std::time::Instant::now();
     let mzml_buf = File::open(mzml_file.as_str()).await?;
@@ -148,7 +129,7 @@ async fn run(
 
     // Print a brief report to stderr:
     for poly in results.polymers.clone().into_iter() {
-        let poly_total = &100. * &poly.total / &results.total;
+        let poly_total = 100. * poly.total / results.total;
         info!("{:26}  {:>8.4}", &poly.name, poly_total);
     }
     info!("{}", "+".repeat(36));
@@ -156,7 +137,6 @@ async fn run(
 
     Ok(results)
 }
-
 
 #[cfg(test)]
 mod tests {

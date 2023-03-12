@@ -28,7 +28,11 @@ impl DefaultPolymers {
     }
 }
 
-
+impl Default for DefaultPolymers {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 #[cfg(test)]
 mod tests {

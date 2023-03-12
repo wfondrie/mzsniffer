@@ -33,7 +33,6 @@ pub fn formula_mass(formula: &str) -> f64 {
     total_mass
 }
 
-
 pub fn mass_to_mz(mass: f64, charge: i32, protonate: bool) -> f64 {
     let mut mz = mass / charge as f64;
     if protonate {
@@ -41,7 +40,6 @@ pub fn mass_to_mz(mass: f64, charge: i32, protonate: bool) -> f64 {
     }
     mz
 }
-
 
 #[cfg(test)]
 mod tests {

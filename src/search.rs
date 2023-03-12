@@ -3,9 +3,9 @@ use std::error::Error;
 use rayon::prelude::*;
 use serde::Serialize;
 
-use crate::polymer::Polymer;
-use crate::mzml::MS1Spectra;
 use crate::defaults::DefaultPolymers;
+use crate::mzml::MS1Spectra;
+use crate::polymer::Polymer;
 
 #[derive(Serialize, Clone, Debug)]
 pub struct PolymerResults {
@@ -15,7 +15,6 @@ pub struct PolymerResults {
     pub tic: Vec<f64>,
     pub total: f64,
 }
-
 
 #[derive(Serialize, Clone, Debug)]
 pub struct PolymerResult {
@@ -34,15 +33,15 @@ impl PolymerResult {
     }
 }
 
-
 pub fn search(
     filename: String,
     spec: MS1Spectra,
     tol: &f64,
-    unit: &str
+    unit: &str,
 ) -> Result<PolymerResults, SearchError> {
     let polymers = DefaultPolymers::new();
-    let poly_results: Vec<PolymerResult> = polymers.0
+    let poly_results: Vec<PolymerResult> = polymers
+        .0
         .into_par_iter()
         .map(|mut x| search_for_polymer(&mut x, &spec, tol, unit))
         .collect::<Result<Vec<PolymerResult>, SearchError>>()?;
@@ -55,17 +54,18 @@ pub fn search(
         total: 0.,
     };
 
-    let _ = spec.spectra
+    let _ = spec
+        .spectra
         .into_iter()
         .map(|x| {
             results.ret_times.push(x.scan_start_time);
             results.tic.push(x.total_ion_current);
             results.total += x.total_ion_current;
-        }).count();
+        })
+        .count();
 
     Ok(results)
 }
-
 
 fn search_for_polymer(
     poly: &mut Polymer,
@@ -76,39 +76,31 @@ fn search_for_polymer(
     poly.calculate_bounds(&spec.scan_range.1, tol, unit);
     let mut results = PolymerResult::new(&poly.name);
 
-    results.xic = spec.spectra
+    results.xic = spec
+        .spectra
         .to_vec()
         .into_par_iter()
-        .map(
-            |x| find_peaks(
-                &poly.precursors.as_ref().unwrap(),
-                &poly.tols.as_ref().unwrap(),
+        .map(|x| {
+            find_peaks(
+                poly.precursors.as_ref().unwrap(),
+                poly.tols.as_ref().unwrap(),
                 &x.mz,
                 &x.intensity,
             )
-        )
+        })
         .collect::<Vec<f64>>();
 
     results.total = results.xic.clone().into_iter().sum();
     Ok(results)
 }
 
-fn find_peaks(
-    query_vec: &Vec<f64>,
-    tol_vec: &Vec<f64>,
-    mz_vec: &Vec<f64>,
-    intensity_vec: &Vec<f64>,
-) -> f64 {
+fn find_peaks(query_vec: &[f64], tol_vec: &[f64], mz_vec: &[f64], intensity_vec: &[f64]) -> f64 {
     let mut total_intensity = 0.;
-    let query_iter = query_vec
-        .into_iter()
-        .zip(tol_vec.into_iter());
+    let query_iter = query_vec.iter().zip(tol_vec.iter());
 
     for (query_mz, tol) in query_iter {
         let mut biggest = 0.;
-        let spec_iter = mz_vec
-            .into_iter()
-            .zip(intensity_vec.into_iter());
+        let spec_iter = mz_vec.iter().zip(intensity_vec.iter());
 
         for (mz, intensity) in spec_iter {
             if (mz - query_mz).abs() <= *tol && intensity > &biggest {
@@ -120,22 +112,14 @@ fn find_peaks(
     total_intensity
 }
 
-
-
 #[derive(Debug)]
 pub struct SearchError {
-    details: String
-}
-
-impl SearchError {
-    fn new(msg: &str) -> SearchError {
-        SearchError{details: msg.to_string()}
-    }
+    details: String,
 }
 
 impl std::fmt::Display for SearchError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f,"{}",self.details)
+        write!(f, "{}", self.details)
     }
 }
 
@@ -144,7 +128,6 @@ impl Error for SearchError {
         &self.details
     }
 }
-
 
 #[cfg(test)]
 mod tests {

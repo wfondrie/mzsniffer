@@ -71,22 +71,21 @@ const SCAN_START_TIME: &str = "MS:1000016";
 const SCAN_WINDOW_LOWER: &str = "MS:1000501";
 const SCAN_WINDOW_UPPER: &str = "MS:1000500";
 
-
 #[derive(Debug)]
 pub struct MS1Spectra {
-   pub spectra: Vec<Spectrum>,
-   pub scan_range: (f64, f64),
+    pub spectra: Vec<Spectrum>,
+    pub scan_range: (f64, f64),
 }
 
 pub struct MzMLReader;
 
 impl MzMLReader {
     /// Create a new [`MzMlReader`].
-    pub fn new() -> Self { Self }
+    pub fn new() -> Self {
+        Self
+    }
 
-    /// Here be dragons -
-    /// Seriously, this kinda sucks because it's a giant imperative, stateful loop.
-    /// But I also don't want to spend any more time working on an mzML parser...
+    /// "Here be dragons" - @lazear
     pub async fn parse<B: AsyncBufRead + Unpin>(&self, b: B) -> Result<MS1Spectra, MzMLError> {
         let mut reader = Reader::from_reader(b);
         let mut buf = Vec::new();
@@ -121,13 +120,10 @@ impl MzMLReader {
                         (b"precursor", Some(State::Spectrum)) => Some(State::Precursor),
                         _ => state,
                     };
-                    match ev.name().into_inner() {
-                        b"spectrum" => {
-                            let id = extract!(ev, b"id");
-                            let id = std::str::from_utf8(&id)?;
-                            spectrum.id = id.to_string();
-                        }
-                        _ => {}
+                    if let b"spectrum" = ev.name().into_inner() {
+                        let id = extract!(ev, b"id");
+                        let id = std::str::from_utf8(&id)?;
+                        spectrum.id = id.to_string();
                     }
                 }
                 Ok(Event::Empty(ref ev)) => match (state, ev.name().into_inner()) {
@@ -286,7 +282,7 @@ impl MzMLReader {
             buf.clear();
         }
 
-        let out = MS1Spectra{
+        let out = MS1Spectra {
             spectra,
             scan_range,
         };
@@ -294,6 +290,11 @@ impl MzMLReader {
     }
 }
 
+impl Default for MzMLReader {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 #[derive(Debug)]
 pub enum MzMLError {

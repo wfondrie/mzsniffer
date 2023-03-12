@@ -50,12 +50,16 @@ impl Polymer {
                 self.protonate,
             );
 
-            if poly_mass > *max_mz { break }
+            if poly_mass > *max_mz {
+                break;
+            }
 
             mz_vec.push(poly_mass);
 
             // In the case that it isn't actually a polymer:
-            if rep_mass == 0. { break }
+            if rep_mass == 0. {
+                break;
+            }
         }
         mz_vec
     }
@@ -77,7 +81,6 @@ impl Polymer {
         self.tols = Some(tol_vals);
     }
 }
-
 
 #[cfg(test)]
 mod tests {
