@@ -16,7 +16,7 @@ path = "src/main.rs"
 regex = "1.6"
 lazy_static = "1.4.0"
 async-compression = { version = "0.3", features = ["tokio", "zlib"] }
-base64 = "0.13"
+base64 = "0.21"
 log = "0.4.0"
 env_logger = "0.10.0"
 tokio = { version = "1.0", features = ["io-util", "fs", "macros", "rt", "rt-multi-thread"] }
