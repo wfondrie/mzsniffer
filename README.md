@@ -28,9 +28,68 @@ mzsniffer --help
 
 ## Usage
 
+mzsniffer is a command line program and can be run in your favorite shell:
+``` sh
+ $ mzsniffer --help
+ Usage: mzsniffer [OPTIONS] [mzml_paths]...
 
+🦨 mzsniffer 👃 - Detect polymer conminants in mass spectra.
 
-## Developing
+Written by William E. Fondrie <fondriew@gmail.com>
+Version 0.1.0
+
+Arguments:
+  [mzml_paths]...  The mzML file(s) to analyze.
+
+Options:
+  -t, --tolerance <tol>  The precursor mass tolerance. [default: 10]
+  -d, --use-da           Use Da instead of ppm as the precursor mass tolerance unit.
+  -f, --format <format>  Specify an output format to be sent to stdout. Must be one of 'json' or 'pickle'.
+  -h, --help             Print help
+  -V, --version          Print version
+```
+
+When provided one or more mzML files, mzsniffer will look for common polymer contaminants:
+
+``` sh
+$ mzsniffer data/MSV000081544.20170728_MS1_17k_plasmaspikedPEG_3.mzML
+[INFO ] Reading data/MSV000081544.20170728_MS1_17k_plasmaspikedPEG_3.mzML...
+[INFO ]  - Read time:  1s
+[INFO ] Extracting MS1 signals of polymer contaminants...
+[INFO ]  - Extraction time:  1s
+[INFO ] ++++++++++++++++++++++++++++++++++++
+[INFO ] Polymer                         %TIC
+[INFO ] ++++++++++++++++++++++++++++++++++++
+[INFO ] PEG+1H                       14.2581
+[INFO ] PEG+2H                        0.6921
+[INFO ] PEG+3H                        0.0013
+[INFO ] PPG                           0.0071
+[INFO ] Triton X-100                  0.0033
+[INFO ] Triton X-100 (Reduced)        0.0074
+[INFO ] Triton X-100 (Na)             0.0010
+[INFO ] Triton X-100 (Reduced, Na)    0.0023
+[INFO ] Triton X-101                  0.0017
+[INFO ] Triton X-101 (Reduced)        0.0013
+[INFO ] Polysiloxane                  0.0029
+[INFO ] Tween-20                      0.0005
+[INFO ] Tween-40                      0.0013
+[INFO ] Tween-60                      0.1121
+[INFO ] Tween-80                      0.0027
+[INFO ] IGEPAL CA-630 (NP-40)         0.0017
+[INFO ] ++++++++++++++++++++++++++++++++++++
+[INFO ]
+[INFO ] DONE!
+[INFO ] Elapsed time:  3s
+```
+
+Using the `--format` argument, you can save more detailed results to as JSON or a pickled Python object.
+Below, we pipe is to a [short Python script](scripts/example_plot.py) to plot the summed extracted ion chromatogram for each contaminant:
+
+``` sh
+$ mzsniffer data/MSV000081544.20170728_MS1_17k_plasmaspikedPEG_3.mzML --format json | scripts/example_plot.py
+```
+![The example plot](img/example.png)
+
 
 ## Attributions
 
