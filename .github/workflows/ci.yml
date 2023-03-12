@@ -1,0 +1,41 @@
+name: Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  cargo-fmt:
+    name: "cargo fmt"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: "Install Rust toolchain"
+        run: rustup component add rustfmt
+      - run: cargo fmt --all --check
+
+  cargo-clippy:
+    name: "cargo clippy"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: "Install Rust toolchain"
+        run: |
+          rustup component add clippy
+      - uses: Swatinem/rust-cache@v1
+      - run: cargo clippy --all-targets --all-features -- -D warnings
+
+  test:
+    name: "run tests"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose
