@@ -19,7 +19,7 @@ Coming soon!
 
 ### Manually download the latest release
 The latest release can be manually downloaded from GitHub:
-1. Navigate to the [Releases](https://github.com/wfondrie/mzsniffer/releases/tag/latest) page.
+1. Navigate to the [Releases](https://github.com/wfondrie/mzsniffer/releases/latest) page.
 2. Download the correct binary for your system.
 3. Run mzsniffer (from the directory to which it was downloaded):
 ``` sh
@@ -83,7 +83,7 @@ $ mzsniffer data/MSV000081544.20170728_MS1_17k_plasmaspikedPEG_3.mzML
 ```
 
 Using the `--format` argument, you can save more detailed results to as JSON or a pickled Python object.
-Below, we pipe is to a [short Python script](scripts/example_plot.py) to plot the summed extracted ion chromatogram for each contaminant:
+Below, we pipe the JSON output to a [short Python script](scripts/example_plot.py) to plot the summed extracted ion chromatogram for each contaminant:
 
 ``` sh
 $ mzsniffer data/MSV000081544.20170728_MS1_17k_plasmaspikedPEG_3.mzML --format json | scripts/example_plot.py
